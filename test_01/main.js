@@ -13,10 +13,24 @@ const size = {
   height: innerHeight,
 };
 const cursor = { x: 0, y: 0 };
+let aspectRatio = size.width / size.height;
 
 addEventListener("mousemove", (e) => {
   cursor.x = e.x / size.width - 0.5;
   cursor.y = -(e.y / size.height - 0.5);
+});
+addEventListener("resize", (e) => {
+  size.width = innerWidth;
+  size.height = innerHeight;
+  aspectRatio = size.width / size.height;
+  camera.aspect = aspectRatio;
+  camera.updateProjectionMatrix();
+  renderer.setSize(size.width, size.height);
+});
+addEventListener("dblclick", (e) => {
+  document.fullscreenElement
+    ? document.exitFullscreen()
+    : canvas.requestFullscreen();
 });
 
 //add single mesh
@@ -26,7 +40,7 @@ addEventListener("mousemove", (e) => {
 // scene.add(mesh);
 // // position
 // // mesh.position.z = -3;
-// mesh.position.x = -1;
+// mesh.position.x = -5;
 // mesh.position.y = -1;
 // // scale
 // /* mesh.scale.x = 2;
@@ -58,7 +72,7 @@ const cube03 = new THREE.Mesh(
 cube01.position.set(-1.5, 0, 0);
 cube03.position.set(1.5, 0, 0);
 
-group.add(cube02);
+group.add(cube01, cube02, cube03);
 
 // group transformation
 // group.rotation.z = 0.1 * Math.PI;
@@ -68,8 +82,7 @@ group.add(cube02);
 const axesHelper = new THREE.AxesHelper();
 scene.add(axesHelper);
 
-const aspectRatio = size.width / size.height;
-const camera = new THREE.PerspectiveCamera(75, size.width / size.height);
+const camera = new THREE.PerspectiveCamera(75, aspectRatio);
 // const camera = new THREE.OrthographicCamera(
 //   -aspectRatio,
 //   aspectRatio,
@@ -86,9 +99,11 @@ camera.position.z = 5;
 // camera.lookAt(mesh.position);
 
 const controls = new OrbitControls(camera, canvas);
+controls.target = group.position;
 
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(size.width, size.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
 renderer.render(scene, camera);
 
 // let time = Date.now();
@@ -125,7 +140,7 @@ function animate() {
   // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3;
   // camera.position.y = cursor.y * 10;
 
-  camera.lookAt(group.position);
+  // camera.lookAt(group.position);
 
   window.requestAnimationFrame(animate);
 }
