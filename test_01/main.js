@@ -2,10 +2,22 @@ import gsap from "gsap";
 import "./style.css";
 
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const canvas = document.querySelector(".webgl");
 
 const scene = new THREE.Scene();
+
+const size = {
+  width: innerWidth,
+  height: innerHeight,
+};
+const cursor = { x: 0, y: 0 };
+
+addEventListener("mousemove", (e) => {
+  cursor.x = e.x / size.width - 0.5;
+  cursor.y = -(e.y / size.height - 0.5);
+});
 
 //add single mesh
 // const geo = new THREE.BoxGeometry(1, 1, 1);
@@ -46,7 +58,7 @@ const cube03 = new THREE.Mesh(
 cube01.position.set(-1.5, 0, 0);
 cube03.position.set(1.5, 0, 0);
 
-group.add(cube01, cube02, cube03);
+group.add(cube02);
 
 // group transformation
 // group.rotation.z = 0.1 * Math.PI;
@@ -56,15 +68,24 @@ group.add(cube01, cube02, cube03);
 const axesHelper = new THREE.AxesHelper();
 scene.add(axesHelper);
 
-const size = {
-  width: innerWidth,
-  height: innerHeight,
-};
+const aspectRatio = size.width / size.height;
 const camera = new THREE.PerspectiveCamera(75, size.width / size.height);
+// const camera = new THREE.OrthographicCamera(
+//   -aspectRatio,
+//   aspectRatio,
+//   1,
+//   -1,
+//   0.1,
+//   100
+// );
+
 scene.add(camera);
-camera.position.x = 1.5;
-camera.position.z = 3;
+// camera.position.x = 1.5;
+camera.position.y = 1.5;
+camera.position.z = 5;
 // camera.lookAt(mesh.position);
+
+const controls = new OrbitControls(camera, canvas);
 
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(size.width, size.height);
@@ -74,28 +95,35 @@ renderer.render(scene, camera);
 
 const clock = new THREE.Clock();
 
-gsap.to(group.position, {
-  duration: 1,
-  delay: 1,
-  x: 2,
-});
-gsap.to(group.position, {
-  duration: 1,
-  delay: 2,
-  x: -2,
-});
+// gsap.to(group.position, {
+//   duration: 1,
+//   delay: 1,
+//   x: 2,
+// });
+// gsap.to(group.position, {
+//   duration: 1,
+//   delay: 2,
+//   x: -2,
+// });
 
 function animate() {
   // const curTime = Date.now();
   // const deltaTime = curTime - time;
   // time = curTime;
 
-  const elapsedTime = clock.getElapsedTime();
+  // const elapsedTime = clock.getElapsedTime();
 
   renderer.render(scene, camera);
   // group.rotation.y += 0.01 * Math.PI * deltaTime * 0.01;
-  group.rotation.y = elapsedTime;
-  group.translateY(Math.cos(elapsedTime) * 0.05);
+  // group.rotation.y = elapsedTime;
+  // group.translateY(Math.cos(elapsedTime) * 0.05);
+
+  // camera.position.x = cursor.x * 5;
+  // camera.position.y = cursor.y * 5;
+
+  // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 3;
+  // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3;
+  // camera.position.y = cursor.y * 10;
 
   camera.lookAt(group.position);
 
