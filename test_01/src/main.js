@@ -42,13 +42,16 @@ addEventListener("dblclick", (e) => {
 // image.src = diff;
 
 const textureLoader = new THREE.TextureLoader();
-const colorTex = textureLoader.load("../static/textures/door/color.jpg");
-const AOTex = textureLoader.load(
+const colorTex = textureLoader.load("/static/textures/minecraft.png");
+// colorTex.minFilter = THREE.NearestFilter;
+colorTex.magFilter = THREE.NearestFilter;
+
+const aoTex = textureLoader.load(
   "../static/textures/door/ambientOcclusion.jpg"
 );
 const alphaTex = textureLoader.load("../static/textures/door/alpha.jpg");
 const heightTex = textureLoader.load("../static/textures/door/height.jpg");
-const metalnessTex = textureLoader.load("../static/textures/door/metallic.jpg");
+const metallicTex = textureLoader.load("../static/textures/door/metallic.jpg");
 const normalTex = textureLoader.load("../static/textures/door/normal.jpg");
 const roughnessTex = textureLoader.load(
   "../static/textures/door/roughness.jpg"
@@ -148,6 +151,7 @@ function animate() {
   // time = curTime;
 
   // const elapsedTime = clock.getElapsedTime();
+  controls.update();
 
   renderer.render(scene, camera);
   // group.rotation.y += 0.01 * Math.PI * deltaTime * 0.01;
