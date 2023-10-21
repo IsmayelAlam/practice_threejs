@@ -33,21 +33,42 @@ addEventListener("dblclick", (e) => {
     : canvas.requestFullscreen();
 });
 
+// Texture
+// const image = new Image();
+// const texture = new THREE.Texture(image);
+// image.onload = () => {
+//   texture.needsUpdate = true;
+// };
+// image.src = diff;
+
+const textureLoader = new THREE.TextureLoader();
+const colorTex = textureLoader.load("../static/textures/door/color.jpg");
+const AOTex = textureLoader.load(
+  "../static/textures/door/ambientOcclusion.jpg"
+);
+const alphaTex = textureLoader.load("../static/textures/door/alpha.jpg");
+const heightTex = textureLoader.load("../static/textures/door/height.jpg");
+const metalnessTex = textureLoader.load("../static/textures/door/metallic.jpg");
+const normalTex = textureLoader.load("../static/textures/door/normal.jpg");
+const roughnessTex = textureLoader.load(
+  "../static/textures/door/roughness.jpg"
+);
+
 //add single mesh
-// const geo = new THREE.BoxGeometry(1, 1, 1);
-// const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-// const mesh = new THREE.Mesh(geo, material);
-// scene.add(mesh);
-// // position
-// // mesh.position.z = -3;
-// mesh.position.x = -5;
-// mesh.position.y = -1;
-// // scale
-// /* mesh.scale.x = 2;
-// mesh.scale.y = 0.5;
-// mesh.scale.z = 0.05;*/
+const geo = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ map: colorTex });
+const mesh = new THREE.Mesh(geo, material);
+scene.add(mesh);
+// position
+// mesh.position.z = 3;
+// mesh.position.x = 2;
+mesh.position.y = 1.5;
+// scale
+/* mesh.scale.x = 2;
+mesh.scale.y = 0.5;
+mesh.scale.z = 0.05;*/
 // mesh.scale.set(2.5, 0.5, 0.5);
-// // rotation
+// rotation
 // mesh.rotation.reorder("YXZ");
 // mesh.rotation.x = 0.25 * Math.PI;
 // mesh.rotation.y = 0.25 * Math.PI;
@@ -58,15 +79,15 @@ scene.add(group);
 
 const cube01 = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 32, 16),
-  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  new THREE.MeshBasicMaterial({ map: colorTex })
 );
 const cube02 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  new THREE.MeshBasicMaterial({ map: colorTex })
 );
 const cube03 = new THREE.Mesh(
   new THREE.CylinderGeometry(0.5, 0.5, 1, 16),
-  new THREE.MeshBasicMaterial({ color: 0x0000ff })
+  new THREE.MeshBasicMaterial({ map: colorTex })
 );
 
 cube01.position.set(-1.5, 0, 0);
@@ -79,8 +100,8 @@ group.add(cube01, cube02, cube03);
 // group.scale.y = 1.5;
 // group.position.y = -0.5;
 
-const axesHelper = new THREE.AxesHelper();
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper();
+// scene.add(axesHelper);
 
 const camera = new THREE.PerspectiveCamera(75, aspectRatio);
 // const camera = new THREE.OrthographicCamera(
