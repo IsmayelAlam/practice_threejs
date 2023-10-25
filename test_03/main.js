@@ -22,7 +22,17 @@ const ambientLight = new THREE.AmbientLight("#b9d5ff", 0.12);
 const doorLight = new THREE.PointLight("#ff7d46", 1, 10);
 doorLight.position.set(0, 2, 2.3);
 
-scene.add(directionalLight, ambientLight);
+const ghostLight1 = new THREE.PointLight("#ff00ff", 2, 3);
+const ghostLight2 = new THREE.PointLight("#00ffff", 2, 3);
+const ghostLight3 = new THREE.PointLight("#ffff00", 2, 3);
+
+scene.add(
+  directionalLight,
+  ambientLight,
+  ghostLight1,
+  ghostLight2,
+  ghostLight3
+);
 
 // material
 const textureLoader = new THREE.TextureLoader();
@@ -154,7 +164,27 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
 renderer.setClearColor("#262837");
 
 // animations
+const clock = new THREE.Clock();
+
 function animate() {
+  const elapsedTime = clock.getElapsedTime();
+
+  ghostLight1.position.set(
+    Math.cos(elapsedTime) * 5,
+    Math.abs(Math.sin(elapsedTime * 5)),
+    Math.sin(elapsedTime) * 5
+  );
+  ghostLight2.position.set(
+    Math.cos(elapsedTime + 549) * 6,
+    Math.abs(Math.sin(elapsedTime * 5 + 65)),
+    Math.sin(elapsedTime + 549) * 5
+  );
+  ghostLight3.position.set(
+    Math.cos(elapsedTime + 55) * 5,
+    Math.abs(Math.sin(elapsedTime * 5 + 58)),
+    Math.sin(elapsedTime + 55) * 6
+  );
+
   controls.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(animate);
