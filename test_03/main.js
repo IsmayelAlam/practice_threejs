@@ -15,24 +15,41 @@ let aspectRatio = size.width / size.height;
 const fog = new THREE.Fog("#262837", 1, 15);
 
 // Light
-const directionalLight = new THREE.DirectionalLight("#b9d5ff", 0.5);
+const directionalLight = new THREE.DirectionalLight("white", 5);
 
 scene.add(directionalLight);
 
 // material
 const textureLoader = new THREE.TextureLoader();
 
-const material = new THREE.MeshStandardMaterial({ color: "white" });
-
 //add group mesh
-const plane = new THREE.PlaneGeometry(1, 1, 1, 1);
+const parameters = {
+  count: 1000,
+  size: 0.02,
+};
 
-const ground = new THREE.Mesh(plane, material);
-ground.position.set(0, 0, 0);
-ground.scale.set(20, 20);
-ground.rotation.set(-Math.PI * 0.5, 0, 0);
+function generateGalaxy() {
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(parameters.count * 3).map(
+    () => (Math.random() - 0.5) * 3
+  );
 
-scene.add(ground);
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+
+  const material = new THREE.PointsMaterial({
+    size: parameters.size,
+    sizeAttenuation: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  const points = new THREE.Points(geo, material);
+  scene.add(points);
+}
+
+generateGalaxy();
+
+// scene.add();
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
