@@ -3,8 +3,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as dat from "dat.gui";
 import Stats from "three/addons/libs/stats.module.js";
 
-import testVertexShader from "./shaders/test/vertex.glsl";
-import testFragmentShader from "./shaders/test/fragment.glsl";
+import testVertexShader from "./shaders/vertex.glsl";
+import testFragmentShader from "./shaders/fragment.glsl";
 
 const canvas = document.querySelector(".webgl");
 const gui = new dat.GUI();
@@ -33,9 +33,9 @@ const material = new THREE.ShaderMaterial({
 });
 
 // add mesh
-let geo = new THREE.PlaneGeometry(1, 1, 32, 32);
-geo = new THREE.BoxGeometry(1, 1, 1, 32, 32, 32);
-// geo = new THREE.SphereGeometry(1, 32, 64);
+const subD = 128;
+let geo = new THREE.PlaneGeometry(1, 1, subD, subD);
+geo = new THREE.BoxGeometry(1, 1, 1, subD, subD, subD);
 const mesh = new THREE.Mesh(geo, material);
 scene.add(mesh);
 
