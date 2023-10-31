@@ -4,9 +4,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as dat from "lil-gui";
 import Stats from "three/addons/libs/stats.module.js";
 
-import vertexShader from "./shaders/material/vertex.glsl";
-import fragmentShader from "./shaders/material/fragment.glsl";
-
 const canvas = document.querySelector(".webgl");
 const gui = new dat.GUI();
 
@@ -66,18 +63,92 @@ const material = new THREE.MeshStandardMaterial({
   map: mapTexture,
   normalMap: normalTexture,
 });
+const depthMat = new THREE.MeshDepthMaterial({
+  depthPacking: THREE.RGBADepthPacking,
+});
 
+const customUniform = {
+  uTime: { value: 0 },
+};
+
+function rotateGeo(shader) {
+  shader.uniforms.uTime = customUniform.uTime;
+
+  shader.vertexShader = shader.vertexShader.replace(
+    "#include <common>",
+    `#include <common>
+      uniform float uTime;
+  
+      mat2 rotate2d(float _angle) {
+          return mat2(cos(_angle),-sin(_angle),sin(_angle),cos(_angle));
+      }
+      `
+  );
+  shader.vertexShader = shader.vertexShader.replace(
+    "#include <beginnormal_vertex>",
+    `#include <beginnormal_vertex>
+    float angle = 0.9 * position.y + uTime;
+    mat2 rotMat = rotate2d(angle);
+  
+    objectNormal.xz *= rotMat;
+    `
+  );
+
+  shader.vertexShader = shader.vertexShader.replace(
+    "#include <begin_vertex>",
+    `
+    #include <begin_vertex>
+    
+    transformed.xz = transformed.xz * rotMat;
+    `
+  );
+}
+material.onBeforeCompile = rotateGeo;
+depthMat.onBeforeCompile = (shader) => {
+  shader.uniforms.uTime = customUniform.uTime;
+
+  shader.vertexShader = shader.vertexShader.replace(
+    "#include <common>",
+    `#include <common>
+        uniform float uTime;
+    
+        mat2 rotate2d(float _angle) {
+            return mat2(cos(_angle),-sin(_angle),sin(_angle),cos(_angle));
+        }
+        `
+  );
+
+  shader.vertexShader = shader.vertexShader.replace(
+    "#include <begin_vertex>",
+    `
+      #include <begin_vertex>
+      float angle = 0.9 * position.y + uTime;
+      mat2 rotMat = rotate2d(angle);
+    
+      transformed.xz = transformed.xz * rotMat;
+      `
+  );
+};
 // add mesh
 gltfLoader.load("/models/LeePerrySmith/LeePerrySmith.glb", (gltf) => {
   // Model
   const mesh = gltf.scene.children[0];
   mesh.rotation.y = Math.PI * 0.5;
   mesh.material = material;
+  mesh.customDepthMaterial = depthMat;
   scene.add(mesh);
 
   // Update materials
   updateAllMaterials();
 });
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(1, 1),
+  new THREE.MeshStandardMaterial({ side: THREE.DoubleSide })
+);
+plane.scale.set(15, 15);
+plane.position.set(0, -5, 5);
+plane.rotation.y = Math.PI;
+scene.add(plane);
 
 // light
 const directionalLight = new THREE.DirectionalLight("#ffffff", 3);
@@ -97,9 +168,17 @@ scene.add(camera);
 const controls = new OrbitControls(camera, canvas);
 
 // renderer
-const renderer = new THREE.WebGLRenderer({ canvas });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(size.width, size.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.colorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
+renderer.setSize(size.width, size.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 // time
 const time = new THREE.Clock();
@@ -108,6 +187,7 @@ const time = new THREE.Clock();
 function animate() {
   stats.begin();
   const elapsedTime = time.getElapsedTime();
+  customUniform.uTime.value = elapsedTime;
 
   controls.update();
   renderer.render(scene, camera);
