@@ -11,7 +11,7 @@ void main(){
 
     float angle = atan(modelPos.x, modelPos.z);
     float distanceToCenter = length(modelPos.xz);
-    float angleOffset = (1.0 / distanceToCenter) * uTime * 0.2;
+    float angleOffset = (1.0 / distanceToCenter) * uTime * 0.25;
     angle += angleOffset;
 
     modelPos.x = cos(angle) * distanceToCenter + aRandom.x;
