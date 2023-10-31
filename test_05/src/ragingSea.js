@@ -3,8 +3,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as dat from "dat.gui";
 import Stats from "three/addons/libs/stats.module.js";
 
-import testVertexShader from "./shaders/vertex.glsl";
-import testFragmentShader from "./shaders/fragment.glsl";
+import vertexShader from "./shaders/water/vertex.glsl";
+import fragmentShader from "./shaders/water/fragment.glsl";
 
 const canvas = document.querySelector(".webgl");
 const gui = new dat.GUI();
@@ -24,8 +24,14 @@ let aspectRatio = size.width / size.height;
 
 // shader
 const material = new THREE.ShaderMaterial({
-  vertexShader: testVertexShader,
-  fragmentShader: testFragmentShader,
+  vertexShader,
+  fragmentShader,
+  uniforms: {
+    uTime: { value: 0 },
+    uBigWavesElevation: { value: 0.2 },
+    uBigWaveFreq: { value: new THREE.Vector2(4, 1.5) },
+    uWaveSpeed: { value: 0.5 },
+  },
 
   side: THREE.DoubleSide,
   transparent: true,
@@ -35,9 +41,21 @@ const material = new THREE.ShaderMaterial({
 // add mesh
 const subD = 128;
 let geo = new THREE.PlaneGeometry(1, 1, subD, subD);
-geo = new THREE.BoxGeometry(1, 1, 1, subD, subD, subD);
+// geo = new THREE.BoxGeometry(1, 1, 1, subD, subD, subD);
 const mesh = new THREE.Mesh(geo, material);
+mesh.rotation.x = -Math.PI * 0.5;
 scene.add(mesh);
+
+gui
+  .add(material.uniforms.uBigWavesElevation, "value", 0, 1, 0.001)
+  .name("Big Waves Elevation");
+gui
+  .add(material.uniforms.uBigWaveFreq.value, "x", 0, 10, 0.01)
+  .name("Big Waves FreqX");
+gui
+  .add(material.uniforms.uBigWaveFreq.value, "y", 0, 10, 0.01)
+  .name("Big Waves FreqY");
+gui.add(material.uniforms.uWaveSpeed, "value", 0, 2, 0.01).name("Wave Speed");
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
@@ -60,6 +78,7 @@ const time = new THREE.Clock();
 function animate() {
   stats.begin();
   const elapsedTime = time.getElapsedTime();
+  material.uniforms.uTime.value = elapsedTime;
 
   controls.update();
   renderer.render(scene, camera);
