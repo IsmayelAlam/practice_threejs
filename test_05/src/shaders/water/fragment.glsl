@@ -1,8 +1,13 @@
-varying vec2 vUv;
+uniform vec3 uDepthColor;
+uniform vec3 uSurfaceColor;
+uniform float uColorOffset;
+uniform float uColorMultiplier;
 
-void main()
-{
-    vec3 uvColor = vec3(vUv, 1.0);
+varying float vElevation;
 
-    gl_FragColor = vec4(uvColor, 1.0);
+void main() {
+    float mixStrength = (vElevation + uColorOffset) * uColorMultiplier;
+    vec3 mixColor = mix(uDepthColor, uSurfaceColor, mixStrength);
+
+    gl_FragColor = vec4(mixColor, 1.0);
 }
