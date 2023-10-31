@@ -33,13 +33,15 @@ const material = new THREE.ShaderMaterial({
 });
 
 // add mesh
-const geo = new THREE.PlaneGeometry(1, 1, 32, 32);
+let geo = new THREE.PlaneGeometry(1, 1, 32, 32);
+geo = new THREE.BoxGeometry(1, 1, 1, 32, 32, 32);
+// geo = new THREE.SphereGeometry(1, 32, 64);
 const mesh = new THREE.Mesh(geo, material);
 scene.add(mesh);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
-camera.position.set(0, 0, 1.5);
+camera.position.set(1, 1, 1.5);
 camera.lookAt(mesh.position);
 scene.add(camera);
 
