@@ -1,9 +1,15 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass";
+import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
+
+import Stats from "three/addons/libs/stats.module";
 import * as dat from "lil-gui";
-import Stats from "three/addons/libs/stats.module.js";
 
 const canvas = document.querySelector(".webgl");
 const gui = new dat.GUI();
@@ -50,9 +56,8 @@ const environmentMap = cubeTextureLoader.load([
   "/textures/nz.jpg",
 ]);
 environmentMap.colorSpace = THREE.SRGBColorSpace;
-// scene.background = environmentMap;
+scene.background = environmentMap;
 scene.environment = environmentMap;
-scene.colorSpace = THREE.SRGBColorSpace;
 
 // texture
 // const mapTexture = textureLoader.load("/models/color.jpg");
@@ -70,6 +75,7 @@ gltfLoader.load("/models/scene.gltf", (gltf) => {
   const mesh = gltf.scene.children[0];
   mesh.rotation.z = Math.PI * 0.5;
   // mesh.material = material;
+
   scene.add(mesh);
 
   // Update materials
@@ -98,17 +104,23 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(size.width, size.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
 
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
-renderer.colorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1;
-renderer.setSize(size.width, size.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
 // post process
-// const effectComposer = new EffectComposer(renderer);
-// effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
+  minFilter: THREE.LinearFilter,
+  magFilter: THREE.LinearFilter,
+  format: THREE.RGBAFormat,
+  colorSpace: THREE.SRGBColorSpace,
+});
+
+const effectComposer = new EffectComposer(renderer, renderTarget);
+effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+effectComposer.setSize(size.width, size.height);
+
+const renderPass = new RenderPass(scene, camera);
+effectComposer.addPass(renderPass);
+
+const pass = new UnrealBloomPass();
+effectComposer.addPass(pass);
 
 // time
 const time = new THREE.Clock();
@@ -118,8 +130,9 @@ function animate() {
   stats.begin();
   const elapsedTime = time.getElapsedTime();
 
+  effectComposer.render();
   controls.update();
-  renderer.render(scene, camera);
+  // renderer.render(scene, camera);
   stats.end();
   window.requestAnimationFrame(animate);
 }
