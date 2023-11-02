@@ -56,7 +56,7 @@ const environmentMap = cubeTextureLoader.load([
   "/textures/nz.jpg",
 ]);
 environmentMap.colorSpace = THREE.SRGBColorSpace;
-scene.background = environmentMap;
+// scene.background = environmentMap;
 scene.environment = environmentMap;
 
 // texture
