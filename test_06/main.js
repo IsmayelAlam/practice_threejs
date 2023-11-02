@@ -6,8 +6,12 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/addons/libs/stats.module";
 import * as dat from "lil-gui";
 
+import firefliesVertexShader from "./shader/fireflies/vertex.glsl";
+import firefliesFragmentShader from "./shader/fireflies/fragment.glsl";
+
 const canvas = document.querySelector(".webgl");
 const gui = new dat.GUI();
+const pixelRatio = Math.min(window.devicePixelRatio, 3);
 
 // performance monitor
 const stats = new Stats();
@@ -21,6 +25,12 @@ const size = {
   height: innerHeight,
 };
 let aspectRatio = size.width / size.height;
+
+const control = { clearColor: "#201919", fireFlySize: 75.0 };
+gui
+  .addColor(control, "clearColor")
+  .onChange(() => renderer.setClearColor(control.clearColor));
+gui.add(control, "fireFlySize", 1, 250, 0.1);
 
 // Draco loader
 const dracoLoader = new DRACOLoader();
@@ -39,19 +49,46 @@ texture.flipY = false;
 // model
 const allMat = new THREE.MeshBasicMaterial({ map: texture });
 const lampMat = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
-const portalMat = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
+const portalMat = new THREE.MeshBasicMaterial({ color: 0x0fff05 });
+const fireFliesMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime: { value: 0 },
+    uPixelRatio: { value: pixelRatio },
+    uSize: { value: control.fireFlySize },
+  },
+  vertexShader: firefliesVertexShader,
+  fragmentShader: firefliesFragmentShader,
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
 
 gltfLoader.load("/portal.glb", (geo) => {
   geo.scene.traverse((child) =>
     child.name === "poleLightA" ||
     child.name === "poleLightB" ||
     child.name === "portalLight"
-      ? (child.material = lampMat)
+      ? child.name === "portalLight"
+        ? (child.material = portalMat)
+        : (child.material = lampMat)
       : (child.material = allMat)
   );
   scene.add(geo.scene);
 });
 
+// particles
+const fireFliesGeo = new THREE.BufferGeometry();
+const fireFliesCount = 30;
+const fireFliesPos = new Float32Array(fireFliesCount * 3).map((_, i) =>
+  i % 3 !== 1 ? (Math.random() - 0.5) * 4 : Math.random() * 2
+);
+fireFliesGeo.setAttribute(
+  "position",
+  new THREE.BufferAttribute(fireFliesPos, 3)
+);
+
+const fireFlies = new THREE.Points(fireFliesGeo, fireFliesMat);
+scene.add(fireFlies);
 // Camera
 const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
 camera.position.set(1, 2, 5);
@@ -63,11 +100,16 @@ const controls = new OrbitControls(camera, canvas);
 // renderer
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(size.width, size.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+renderer.setPixelRatio(pixelRatio);
+renderer.setClearColor(control.clearColor);
 
+const clock = new THREE.Clock();
 // animations
 function animate() {
   stats.begin();
+  fireFliesMat.uniforms.uSize.value = control.fireFlySize;
+  fireFliesMat.uniforms.uTime.value = clock.getElapsedTime();
+
   controls.update();
   renderer.render(scene, camera);
   stats.end();
