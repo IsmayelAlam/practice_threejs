@@ -1,8 +1,16 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import * as dat from "dat.gui";
+
+import Stats from "three/addons/libs/stats.module";
+import * as dat from "lil-gui";
 
 const canvas = document.querySelector(".webgl");
+const gui = new dat.GUI();
+
+// performance monitor
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb
+document.body.appendChild(stats.dom);
 
 const scene = new THREE.Scene();
 
