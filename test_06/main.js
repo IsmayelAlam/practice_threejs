@@ -8,6 +8,8 @@ import * as dat from "lil-gui";
 
 import firefliesVertexShader from "./shader/fireflies/vertex.glsl";
 import firefliesFragmentShader from "./shader/fireflies/fragment.glsl";
+import portalVertexShader from "./shader/portal/vertex.glsl";
+import portalFragmentShader from "./shader/portal/fragment.glsl";
 
 const canvas = document.querySelector(".webgl");
 const gui = new dat.GUI();
@@ -26,11 +28,18 @@ const size = {
 };
 let aspectRatio = size.width / size.height;
 
-const control = { clearColor: "#201919", fireFlySize: 75.0 };
+const control = {
+  clearColor: "#201919",
+  fireFlySize: 75.0,
+  portalStartColor: new THREE.Color(0xff0000),
+  portalEndColor: new THREE.Color(0x0000ff),
+};
 gui
   .addColor(control, "clearColor")
   .onChange(() => renderer.setClearColor(control.clearColor));
 gui.add(control, "fireFlySize", 1, 250, 0.1);
+gui.addColor(control, "portalStartColor");
+gui.addColor(control, "portalEndColor");
 
 // Draco loader
 const dracoLoader = new DRACOLoader();
@@ -49,7 +58,6 @@ texture.flipY = false;
 // model
 const allMat = new THREE.MeshBasicMaterial({ map: texture });
 const lampMat = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
-const portalMat = new THREE.MeshBasicMaterial({ color: 0x0fff05 });
 const fireFliesMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0 },
@@ -61,6 +69,16 @@ const fireFliesMat = new THREE.ShaderMaterial({
   transparent: true,
   blending: THREE.AdditiveBlending,
   depthWrite: false,
+});
+const portalMat = new THREE.ShaderMaterial({
+  vertexShader: portalVertexShader,
+  fragmentShader: portalFragmentShader,
+  transparent: true,
+  uniforms: {
+    uTime: { value: 0 },
+    uStartColor: { value: control.portalStartColor },
+    uEndColor: { value: control.portalEndColor },
+  },
 });
 
 gltfLoader.load("/portal.glb", (geo) => {
@@ -109,6 +127,10 @@ function animate() {
   stats.begin();
   fireFliesMat.uniforms.uSize.value = control.fireFlySize;
   fireFliesMat.uniforms.uTime.value = clock.getElapsedTime();
+
+  portalMat.uniforms.uTime.value = clock.getElapsedTime();
+  portalMat.uniforms.uStartColor.value = control.portalStartColor;
+  portalMat.uniforms.uEndColor.value = control.portalEndColor;
 
   controls.update();
   renderer.render(scene, camera);
