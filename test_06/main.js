@@ -31,8 +31,8 @@ let aspectRatio = size.width / size.height;
 const control = {
   clearColor: "#201919",
   fireFlySize: 75.0,
-  portalStartColor: new THREE.Color(0xff0000),
-  portalEndColor: new THREE.Color(0x0000ff),
+  portalStartColor: new THREE.Color("#c1a436"),
+  portalEndColor: new THREE.Color("#f1ec91"),
 };
 gui
   .addColor(control, "clearColor")
@@ -109,7 +109,7 @@ const fireFlies = new THREE.Points(fireFliesGeo, fireFliesMat);
 scene.add(fireFlies);
 // Camera
 const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
-camera.position.set(1, 2, 5);
+camera.position.set(1, 2, 4);
 scene.add(camera);
 
 // controls
