@@ -3,6 +3,7 @@ import { Perf } from "r3f-perf";
 import Lights from "./Light";
 import Level from "./Level";
 import { Physics } from "@react-three/rapier";
+import Player from "./Player";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Lights />
       <Physics debug>
         <Level />
+        <Player />
       </Physics>
     </>
   );
