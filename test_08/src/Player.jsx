@@ -1,10 +1,13 @@
+import { Vector3 } from "three";
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Player() {
   const [subKeys, getKeys] = useKeyboardControls();
+  const [smoothCamPos] = useState(() => new Vector3(5, 5, 5));
+  const [smoothCamTer] = useState(() => new Vector3());
   const body = useRef();
 
   useEffect(() => {
@@ -22,13 +25,16 @@ export default function Player() {
   }, []);
 
   useFrame((state, delta) => {
+    /**
+     * controls
+     */
     const { forward, backward, leftward, rightward } = getKeys();
 
     const impulse = { x: 0, y: 0, z: 0 };
     const torque = { x: 0, y: 0, z: 0 };
 
-    const impulseStrength = 0.5 * delta;
-    const torqueStrength = 0.2 * delta;
+    const impulseStrength = 0.3 * delta;
+    const torqueStrength = 0.1 * delta;
 
     if (forward) {
       impulse.z -= impulseStrength;
@@ -49,6 +55,26 @@ export default function Player() {
 
     body.current.applyImpulse(impulse);
     body.current.applyTorqueImpulse(torque);
+
+    /**
+     * Camera
+     */
+    const bodyPos = body.current.translation();
+
+    const cameraPos = new Vector3();
+    cameraPos.copy(bodyPos);
+    cameraPos.z += 2.25;
+    cameraPos.y += 0.65;
+
+    const cameraTarget = new Vector3();
+    cameraTarget.copy(bodyPos);
+    cameraTarget.y += 0.25;
+
+    smoothCamPos.lerp(cameraPos, 5 * delta);
+    smoothCamTer.lerp(cameraTarget, 5 * delta);
+
+    state.camera.position.copy(smoothCamPos);
+    state.camera.lookAt(smoothCamTer);
   });
 
   return (
