@@ -6,17 +6,28 @@ import { useEffect, useRef, useState } from "react";
 import useGame from "./stores/useGame";
 
 export default function Player() {
+  const [smoothCamPos] = useState(() => new Vector3(5, 5, 5));
+  const [smoothCamTer] = useState(() => new Vector3());
   const [subKeys, getKeys] = useKeyboardControls();
+  const body = useRef();
+
   const start = useGame((state) => state.start);
   const end = useGame((state) => state.end);
   const restart = useGame((state) => state.restart);
   const blockCount = useGame((state) => state.blockCount);
 
-  const [smoothCamPos] = useState(() => new Vector3(5, 5, 5));
-  const [smoothCamTer] = useState(() => new Vector3());
-  const body = useRef();
-
   useEffect(() => {
+    const unSubReset = useGame.subscribe(
+      (state) => state.phase,
+      (value) => {
+        if (value === "ready") {
+          body.current.setTranslation({ x: 0, y: 1, z: 0 });
+          body.current.setLinvel({ x: 0, y: 0, z: 0 });
+          body.current.setAngvel({ x: 0, y: 0, z: 0 });
+        }
+      }
+    );
+
     const unSubJump = subKeys(
       (state) => state.jump,
       (value) => {
@@ -29,7 +40,8 @@ export default function Player() {
 
     return () => {
       unSubJump();
-      // unSubAny();
+      unSubAny();
+      unSubReset();
     };
   }, []);
 
