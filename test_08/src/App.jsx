@@ -7,6 +7,7 @@ import Lights from "./Light";
 import Level from "./Level";
 import Player from "./Player";
 import Interface from "./Interface";
+import Effects from "./Effects";
 import useGame from "./stores/useGame";
 
 function App() {
@@ -30,8 +31,9 @@ function App() {
           position: [2.5, 4, 6],
         }}
       >
-        <Perf />
+        {/* <Perf /> */}
         <Lights />
+        {/* <Effects /> */}
         <Physics>
           <Level count={blocks} />
           <Player />

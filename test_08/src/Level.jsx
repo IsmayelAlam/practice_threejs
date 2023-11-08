@@ -1,24 +1,43 @@
-import { useGLTF } from "@react-three/drei";
+import { Float, Text, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { CuboidCollider, RigidBody } from "@react-three/rapier";
 import { useMemo, useRef, useState } from "react";
 import { BoxGeometry, Euler, MeshStandardMaterial, Quaternion } from "three";
+import useGame from "./stores/useGame";
 
 const boxGeo = new BoxGeometry(1, 1, 1);
 
-const floor1Mat = new MeshStandardMaterial({ color: "limegreen" });
-const floor2Mat = new MeshStandardMaterial({ color: "greenyellow" });
-const obstacleMat = new MeshStandardMaterial({ color: "orangered" });
-const wallMat = new MeshStandardMaterial({ color: "slategrey" });
+const floor1Mat = new MeshStandardMaterial({
+  color: "limegreen",
+  metalness: 0,
+  roughness: 0,
+});
+const floor2Mat = new MeshStandardMaterial({
+  color: "greenyellow",
+  metalness: 0,
+  roughness: 0,
+});
+const obstacleMat = new MeshStandardMaterial({
+  color: "orangered",
+  metalness: 0,
+  roughness: 1,
+});
+const wallMat = new MeshStandardMaterial({
+  color: "slategrey",
+  metalness: 0,
+  roughness: 0,
+});
 
 export default function Level({ count = 5 }) {
   const types = [BlockSpinner, BlockLimbo, BlockAxe];
+  const blockCount = useGame((state) => state.blockSeed);
+
   const blocks = useMemo(
     () =>
       [...new Array(count).keys()].map(
         () => types[Math.floor(Math.random() * types.length)]
       ),
-    [count, types]
+    [count, types, blockCount]
   );
 
   return (
@@ -70,6 +89,19 @@ function Bounce({ length = 1 }) {
 function BlockStart({ pos = [0, 0, 0] }) {
   return (
     <group position={pos}>
+      <Float>
+        <Text
+          font="./bebas-neue-v9-latin-regular.woff"
+          scale={0.4}
+          maxWidth={0.25}
+          lineHeight={0.75}
+          textAlign="right"
+          position={[0.75, 0.65, 0]}
+          rotation-y={-0.25}
+        >
+          Marble Race
+        </Text>
+      </Float>
       <mesh
         geometry={boxGeo}
         material={floor1Mat}
